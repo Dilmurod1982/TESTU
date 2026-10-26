@@ -13,6 +13,7 @@ import TeacherTestView from "../pages/teacher/TeacherTestView";
 import TeacherRoomView from "../pages/teacher/TeacherRoomView";
 import StudentDashboard from "../pages/student/StudentDashboard";
 import StudentRoomView from "../pages/student/StudentRoomView";
+import ChangePassword from "../pages/account/ChangePassword";
 import { RequireRole, RedirectIfAuthed } from "./ProtectedRoute";
 
 export default function AppRouter() {
@@ -42,6 +43,18 @@ export default function AppRouter() {
 
         {/* Завершение профиля после Google/Apple */}
         <Route path="/complete-profile" element={<CompleteProfile />} />
+
+        {/* ---------- Смена пароля (все роли) ---------- */}
+        <Route
+          path="/account/password"
+          element={
+            <RequireRole role={["superadmin", "admin", "teacher", "student"]}>
+              <DashboardLayout>
+                <ChangePassword />
+              </DashboardLayout>
+            </RequireRole>
+          }
+        />
 
         {/* ---------- Суперадмин ---------- */}
         <Route

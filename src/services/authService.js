@@ -4,10 +4,11 @@ import {
   signInWithPopup,
   signOut,
   onAuthStateChanged,
+  EmailAuthProvider,
+  reauthenticateWithCredential,
+  updatePassword,
 } from "firebase/auth";
-import {
-  doc, getDoc, setDoc, serverTimestamp,
-} from "firebase/firestore";
+import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 
 export const loginWithEmail = (email, password) =>
   signInWithEmailAndPassword(auth, email, password);
@@ -22,7 +23,6 @@ export async function getUserProfile(uid) {
   return snap.data();
 }
 
-// Создаёт профиль студента при первом входе через Google/Apple
 export async function ensureStudentProfile(user) {
   const ref = doc(db, "users", user.uid);
   const snap = await getDoc(ref);
@@ -62,4 +62,15 @@ export function subscribeAuth(callback) {
       callback(user, null);
     }
   });
+}
+
+// Смена пароля с повторной аутентификацией
+export async function changePassword({ currentPassword, newPassword }) {
+  const user = auth.currentUser;
+  if (!user) throw new Error("Пользователь не авторизован");
+  if (!user.email) throw new Error("У аккаунта нет email (вход через Google/Apple)");
+
+  const credential = EmailAuthProvider.credential(user.email, currentPassword);
+  await reauthenticateWithCredential(user, credential);
+  await updatePassword(user, newPassword);
 }
